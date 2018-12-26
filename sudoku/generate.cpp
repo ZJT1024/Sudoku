@@ -73,8 +73,19 @@ void Permutate_for_move_step(int temp1[2][2], int temp2[6][3], int temp3[6][3], 
 }
 
 void Permutate_for_permutation(int source[], int start, int end, int target[Maxn][Maxm], int& line, int max_num)
+/*****************************************************************************
+参数：source[]：初始的排列（后续生成的所有排列通过该排列变换，相当于种子
+      start：需要排列的序列起点，用于递归
+	  end：需要排列的序列终点，用于递归
+	  target[Maxn][Maxm]：每一行记录一种排列
+	  line：记录当前生成的排列是第几种
+	  max_num：需要最多的首行排列数
+
+作用：该函数能更具max_num和source[]，递归调用自身，完成对初始序列的全排序，将排序结果
+	  放在target数组中，每一行放一种排序，最多有max_num行
+******************************************************************************/
 {
-	if (start == end)
+	if (start == end)	//  终止条件
 	{
 		for (int i = 0; i <= end; i++)
 		{
@@ -86,12 +97,12 @@ void Permutate_for_permutation(int source[], int start, int end, int target[Maxn
 	{
 		for (int i = start; i <= end; i++)
 		{
-			if (line >= max_num)
+			if (line >= max_num)	// 当前全排序还没有生成结束，但是应为当前的终局生成需求数不需要那么多，所以强制返回
 			{
 				return;
 			}
 
-			Swap(source[i], source[start]);
+			Swap(source[i], source[start]);		//  交换两个元素位置
 			Permutate_for_permutation(source, start + 1, end, target, line, max_num);
 			Swap(source[i], source[start]);
 		}
@@ -121,17 +132,26 @@ void FillThePermutaion(const int max_num, int permutation[Maxn][Maxm])
 }
 
 void FillTheBlock(int cnt, int move_step[80][Maxm], int permutation[Maxn][Maxm])
+/*****************************************************************************
+参数：cnt：指令中-c的参数，即需要的数独生成终局的数量
+	  move_step[80][Maxm]：第2至9行的行平移偏移量，每一行为中排序，每行的第i个元素对应第i + 1行的平移偏移量
+	  permutation[Maxn][Maxm]：首行排序，每一行对应一种排序
+
+作用：该函数将首行全排列和2只9行每行平移偏移量结合起来，生成数独终局，一个首行全排列和一个平移偏移量排列即
+可组成一个数独终局
+******************************************************************************/
 {
 	int pl = cnt / 72;	//	需要的排列数量
 	int ml = cnt % 72;  //	最后一个排列需要平移偏移量排列数
 
 
+	//  为了减少最后输出是，写的次数，将一个数独终局以一个字符串的形式保存起来，最后一次性输出
 	char temp[200];	// 一个数独终局的符号总数为9 * 9 * 2 = 162
 	int temp_site = 0;
 
 	memset(temp, 0, sizeof(char) * 200);
 
-	for (int i = 0; i < 9; i++)		//  输出第一行
+	for (int i = 0; i < 9; i++)		//  输出第一行（因为第一行不平移，所以单独处理）
 	{
 		temp[temp_site] = permutation[pl][i] + '0';
 		temp_site++;

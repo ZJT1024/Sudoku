@@ -23,35 +23,52 @@ int CheckNum(const int& rm, const int& cm, const int& bm)
 	return !(rm || cm || bm);
 }
 
-int DFS(Point p[], const int& num, int rm[Maxm][Maxm], int cm[Maxm][Maxm], int bm[Maxm][Maxm], int step, int block[Maxm][Maxm])
+bool DFS(Point p[], const int& num, int rm[Maxm][Maxm], int cm[Maxm][Maxm], int bm[Maxm][Maxm], int step, int block[Maxm][Maxm])
+/*****************************************************************************
+参数：p[]：空位数组，在扫描之后，记录个空位的坐标（行，列）等有关信息
+      num：空位数量，记录空位总数，作为递归重点的依据
+	  rm[Maxm][Maxm]：行元素记录表，rm[x][y] == 1 表示x行包含元素y
+	  cm[Maxm][Maxm]：列元素记录表，cm[x][y] == 1 表示x列包含元素y
+	  bm[Maxm][Maxm]：块元素记录表，bm[x][y] == 1 表示小九宫盒x包含元素y，小九宫格顺序为从0到8，一行一行编码
+	  step：表示当前在试探的空位在空位数组中的脚标，用于递归
+	  block[Maxm][Maxm]：记录一个数独残局
+
+返回值：bool型，返回1表示递归找到了可行解，否则表示没有找到
+
+作用：通过递归调用自身，按照空位数组p[]中的顺序对每个空位进行试探，当填满所有空位时，递归结束，找到一个可行解
+******************************************************************************/
 {
 	if (step == num)
 	{
 		return true;
 	}
 
-	for (int i = 1; i <= 9; i++)
+	for (int i = 1; i <= 9; i++)	//  对于每个空位，从1到9依次试探
 	{
 		int r = p[step].row, c = p[step].col;
 
-		if (CheckNum(rm[r][i], cm[c][i], bm[GetBlockNum(r, c)][i]))
+		if (CheckNum(rm[r][i], cm[c][i], bm[GetBlockNum(r, c)][i]))	// 检查在空位（r,c)上填数字i是否合适
 		{
+			/* 打表记录 */
 			SetMark(rm, r, i, 1);
 			SetMark(cm, c, i, 1);
 			SetMark(bm, GetBlockNum(r, c), i, 1);
-
+			
 			block[r][c] = i;
+			/*  结束  */
 
-			if (DFS(p, num, rm, cm, bm, step + 1, block))
+			if (DFS(p, num, rm, cm, bm, step + 1, block))	//搜索下一个空位
 			{
-				return true;
+				return true;	// 递归找到了一个可行解
 			}
 
+			/*  递归没有找到可行解，当前位置不能填数字i，恢复之前打表的数据  */
 			SetMark(rm, r, i, 0);
 			SetMark(cm, c, i, 0);
 			SetMark(bm, GetBlockNum(r, c), i, 0);
 
 			block[r][c] = 0;
+			/*  结束  */
 		}
 	}
 
