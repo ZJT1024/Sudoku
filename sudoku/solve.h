@@ -15,4 +15,6 @@ int DFS(Point p[], const int& num, int rm[Maxm][Maxm], int cm[Maxm][Maxm], int b
 
 void Output(int block[Maxm][Maxm]);
 
+bool Cmp(Point& x, Point& y);
+
 void  Solve();
