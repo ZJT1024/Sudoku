@@ -1,0 +1,4 @@
+﻿  unittest1.cpp
+e:\software_homework\individual\sudoku\sudoku\headfile.h(13): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+e:\software_homework\individual\sudoku\sudoku\checkorder.cpp(16): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+  test_instruction.vcxproj -> E:\software_homework\individual\sudoku\x64\Debug\test_instruction.dll
