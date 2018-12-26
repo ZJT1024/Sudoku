@@ -42,6 +42,10 @@ bool DFS(Point p[], const int& num, int rm[Maxm][Maxm], int cm[Maxm][Maxm], int 
 	{
 		return true;
 	}
+	else if (step < 0 || step > num)
+	{
+		return false;
+	}
 
 	for (int i = 1; i <= 9; i++)	//  对于每个空位，从1到9依次试探
 	{
