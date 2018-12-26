@@ -17,29 +17,20 @@ using namespace std;
 
 
 
-
-
-
-
 int main()
 {
 	char order[100];	//  记录用户输入的指令
 	int num, type;		//  num记录终局需求数量，type记录操作类型  1 为生成数独终局  2 为求解数独残局
 	char name[100];		//  name记录-s 后的参数，即存储题目的文件名
 
-
-						//if (freopen("in.txt", "r", stdin))
-						//{
 	if (freopen("sudoku.txt", "w", stdout))
 	{
 		gets_s(order);		// 接受指令
 		while (!CheckOrder(order, num, name, type))   //检查指令是否合法，如果非法，重新取指，如果合法，num中存放终局数量，type中存放问题求解方式
 		{
 			cout << "Please check the command!" << endl;
-			gets_s(order);		// 少了重新读指令，会出现死循环
+			gets_s(order);	    // 少了重新读指令，会出现死循环
 		}
-
-		time_t t1 = time(0);
 
 		if (type == 1)	//操作符为 -c
 		{
@@ -55,17 +46,8 @@ int main()
 			}
 		}
 
-		time_t t2 = time(0);
-
 		fclose(stdout);
-
-		/*if (freopen("time.txt", "w", stdout))
-		{
-		printf("%d\n", t2 - t1);
-		}*/
 	}
-	//}
-
 	return 0;
 }
 
