@@ -50,9 +50,6 @@
     <ClCompile Include="generate.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Point.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="solve.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

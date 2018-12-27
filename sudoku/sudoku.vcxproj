@@ -160,7 +160,6 @@
   <ItemGroup>
     <ClCompile Include="CheckOrder.cpp" />
     <ClCompile Include="generate.cpp" />
-    <ClCompile Include="Point.cpp" />
     <ClCompile Include="solve.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

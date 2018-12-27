@@ -5,11 +5,17 @@
 
 using namespace std;
 
+
+/*  因为放在函数体内的话，堆栈会爆，就只能放在外面，但是不能当做全局变量使用，这样会增加程序的耦合度  */
 int move_step[80][Maxm];
 int permutation[Maxn][Maxm];
 
 
 void Swap(int & a, int & b)
+/**********************
+参数 a、b两个数
+功能：交换两个数的数值
+***********************/
 {
 	int temp = a;
 	a = b;
@@ -17,7 +23,19 @@ void Swap(int & a, int & b)
 }
 
 void Permutate_for_temp(int source[], int start, int end, int target[6][3], int& line)
+/*************************************************************************************
+参数	source[]：为原始排列，之后生成的排列都是对该原始排列的变换，相当于种子
+		start：排列的起始位置，用于递归		end：排列的终止位置，用于递归
+		target[][]：记录排列好的序列，一行为一个排列	line：行号
+
+功能：对2 ~ 9行划分好的平移偏移量小组进行排列，递归完成
+*************************************************************************************/
 {
+	if (start > end)  // 防止错误输入
+	{
+		start = end;
+	}
+
 	if (start == end)
 	{
 		for (int i = 0; i <= end; i++)
@@ -38,16 +56,23 @@ void Permutate_for_temp(int source[], int start, int end, int target[6][3], int&
 }
 
 void Permutate_for_move_step(int temp1[2][2], int temp2[6][3], int temp3[6][3], int max_num, int move_step[80][Maxm])
+/*******************************************************************************************************
+参数	temp1、temp2、temp3分别为二三行，四五六行，七八九行的平移偏移量全排列
+		max_num：用于记录需要的最多2 ~ 9行平移偏移量排列数
+		move_step[][]：记录2 ~ 9行的平移偏移量排列，每一行为一个排列
+
+功能：对二三行，四五六行，七八九行的平移偏移量的全排列进行组合，生成2 ~ 9行的全排列
+********************************************************************************************************/
 {
 	int cnt = 0;
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 2; i++)  //  二三行有两个排列，二选一
 	{
-		for (int j = 0; j < 6; j++)
+		for (int j = 0; j < 6; j++)  //  四五六行有六个全排列，六选一
 		{
-			for (int k = 0; k < 6; k++)
+			for (int k = 0; k < 6; k++)  //  七八九行有六个全排列，六选一
 			{
-				for (int r = 0; r < 8; r++)
+				for (int r = 0; r < 8; r++)  //  每个排列有8个元素（首元素不动）
 				{
 					if (r < 2)
 					{
@@ -85,6 +110,11 @@ void Permutate_for_permutation(int source[], int start, int end, int target[Maxn
 	  放在target数组中，每一行放一种排序，最多有max_num行
 ******************************************************************************/
 {
+	if (start > end)  // 防止输入错误，导致越界
+	{
+		start = end;
+	}
+
 	if (start == end)	//  终止条件
 	{
 		for (int i = 0; i <= end; i++)
@@ -109,9 +139,9 @@ void Permutate_for_permutation(int source[], int start, int end, int target[Maxn
 	}
 }
 
-void FillTheMoveStep(const int max_num, int move_step[80][Maxm])
+void FillTheMoveStep(const int max_num, int move_step[80][Maxm])	//  根据最大需求数求2 ~ 9行平移偏移量的排列
 {
-	int source2[] = { 1 , 4 , 7 }, source3[] = { 2 , 5 , 8 };
+	int source2[] = { 1 , 4 , 7 }, source3[] = { 2 , 5 , 8 };	// 二三行一组，四五六行一组，七八九行一组
 	int temp1[2][2], temp2[6][3], temp3[6][3];
 	int line2 = 0, line3 = 0;
 
@@ -121,7 +151,7 @@ void FillTheMoveStep(const int max_num, int move_step[80][Maxm])
 	Permutate_for_temp(source2, 0, 2, temp2, line2);
 	Permutate_for_temp(source3, 0, 2, temp3, line3);
 
-	Permutate_for_move_step(temp1, temp2, temp3, max_num, move_step);
+	Permutate_for_move_step(temp1, temp2, temp3, max_num, move_step);	//  根据各小组的排列信息组合2 ~ 9 行的排列
 }
 
 void FillThePermutaion(const int max_num, int permutation[Maxn][Maxm])
@@ -204,12 +234,12 @@ void FillTheBlock(int cnt, int move_step[80][Maxm], int permutation[Maxn][Maxm])
 void Generate(int num)
 {
 
-	FillTheMoveStep(min(num, 72), move_step);
-	FillThePermutaion(num / 72 + 1, permutation);
+	FillTheMoveStep(min(num, 72), move_step);	// 求解2 ~ 8 行平移偏移量排列
+	FillThePermutaion(num / 72 + 1, permutation);  // 求解首行全排列
 
 	for (int cnt = 0; cnt < num; cnt++)
 	{
-		FillTheBlock(cnt, move_step, permutation);
+		FillTheBlock(cnt, move_step, permutation);  // 生成数独终局并输出
 		if (cnt != num - 1)
 		{
 			printf("\n");

@@ -8,17 +8,17 @@
 using namespace std;
 
 
-void SetMark(int str[Maxm][Maxm], const int& site, const int& num, const int flag)
+void SetMark(int str[Maxm][Maxm], const int& site, const int& num, const int flag)  // 将str数组的第site行,num列标记为flag，具体意义要看传入的数组是什么
 {
 	str[site][num] = flag;
 }
 
-int GetBlockNum(const int& x, const int& y)
+int GetBlockNum(const int& x, const int& y)  //  根据元素的行号和列号生成元素所在小九宫格好（顺序从0开始，从左到右，从上到下）
 {
 	return x / 3 * 3 + y / 3;
 }
 
-int CheckNum(const int& rm, const int& cm, const int& bm)
+int CheckNum(const int& rm, const int& cm, const int& bm)	//  根据三个打表的参数判断当前试探的数字是否合适，用于DFS中的空位元素试探
 {
 	return !(rm || cm || bm);
 }
@@ -86,7 +86,7 @@ void Output(int block[Maxm][Maxm])
 
 	memset(temp, 0, sizeof(char) * 200);
 
-	for (int i = 0; i < 9; i++)
+	for (int i = 0; i < 9; i++)		//  将一个二维数组编程一个一维字符串，减少写的次数
 	{
 		for (int j = 0; j < 9; j++)
 		{
@@ -116,9 +116,29 @@ void Output(int block[Maxm][Maxm])
 	puts(temp);
 }
 
-bool Cmp(Point& x, Point& y)
+bool Cmp(Point& x, Point& y)	// 更具两个参数的num属性（该元素周围的已知数的数量）比较大小
 {
 	return x.num > y.num;
+}
+
+
+void Init(int rowmark[Maxm][Maxm], int colmark[Maxm][Maxm], int blockmark[Maxm][Maxm],
+	int row_num[Maxm], int col_num[Maxm], int block_num[Maxm],
+	int& input_row, int& right, int& ans_num)
+/**************************************************************
+参数 见Solve函数模块
+功能：初始化参数
+*************************************************************/
+{
+	memset(row_num, 0, sizeof(int) * Maxm);
+	memset(col_num, 0, sizeof(int) * Maxm);
+	memset(block_num, 0, sizeof(int) * Maxm);
+	memset(rowmark, 0, sizeof(int) * Maxm * Maxm);
+	memset(colmark, 0, sizeof(int) * Maxm * Maxm);
+	memset(blockmark, 0, sizeof(int) * Maxm * Maxm);
+	input_row = 0;
+	right = 1;
+	ans_num = 0;
 }
 
 void  Solve()
@@ -130,30 +150,18 @@ void  Solve()
 	int row_num[Maxm], col_num[Maxm], block_num[Maxm];  // 用于记录每行每列每个小九宫格中题目给出的已知数字的数量，用于最后排序优先级的判断
 
 	int block[Maxm][Maxm];		// 用于记录一道数独题的题目
-	Point ans_point[Maxm * Maxm];
-	int ans_num = 0;
+	Point ans_point[Maxm * Maxm];  //用于记录空位数组
+	int ans_num;  //  用于记录空位个数
 
-	int right = 1;	//  记录输入的已知数独是否正确
+	int right;	//  记录输入的已知数独是否正确
 
 
 	char temp_input[2 * Maxm];
 	int input_row;
 
-	int mark = 0;
+	int mark = 0;  //  记录当前求解的是第几个数独残局，用于最后解的时候的格式判断
 
-
-
-	/*  初始化  */
-	memset(row_num, 0, sizeof(int) * Maxm);
-	memset(col_num, 0, sizeof(int) * Maxm);
-	memset(block_num, 0, sizeof(int) * Maxm);
-	memset(rowmark, 0, sizeof(int) * Maxm * Maxm);
-	memset(colmark, 0, sizeof(int) * Maxm * Maxm);
-	memset(blockmark, 0, sizeof(int) * Maxm * Maxm);
-	input_row = 0;
-	/*  结束  */
-
-
+	Init(rowmark, colmark, blockmark, row_num, col_num, block_num, input_row, right, ans_num);
 
 	while (gets_s(temp_input))
 	{
@@ -167,33 +175,34 @@ void  Solve()
 					printf("\n");
 				}
 
+				/*  如果题目在读的过程中，没有读够9行就遇到空行，证明题目不全  */
 				printf("Imcompleted input!\n");
 				mark++;
 			}
 
-			memset(row_num, 0, sizeof(int) * Maxm);
-			memset(col_num, 0, sizeof(int) * Maxm);
-			memset(block_num, 0, sizeof(int) * Maxm);
-			memset(rowmark, 0, sizeof(int) * Maxm * Maxm);
-			memset(colmark, 0, sizeof(int) * Maxm * Maxm);
-			memset(blockmark, 0, sizeof(int) * Maxm * Maxm);
-			input_row = 0;
-			right = 1;
-			ans_num = 0;
+			Init(rowmark, colmark, blockmark, row_num, col_num, block_num, input_row, right, ans_num);
 			continue;
 		}
 
-		if (right)
+		if (right)  // 如果到目前为止，读到的数据都合法的话
 		{
-			int input_col = 0;
+			int input_col = 0;  // 作为当前读入的这行题目的脚标，访问当前读入的这一行
 
 			int len = strlen(temp_input);
+			if (len != 17)
+			{
+				/*  合法的题目一行应该有且仅有9个数字，8个空格  */
+				right = 0;
+				len = 0;  //不执行下面的for循环
+			}
+
 			for (int i = 0; i < len; i++)
 			{
 				if (temp_input[i] <'0' || temp_input[i] > '9')
 				{
 					if (temp_input[i] != ' ')
 					{
+						/*  如果读到一个非0到9之间的字符，且这个字符不是空格  */
 						right = 0;
 						break;
 					}
@@ -201,26 +210,28 @@ void  Solve()
 					continue;
 				}
 
+				/*  读到的字符在0到9之间  */
 				int temp_num = temp_input[i] - '0';
 
 				block[input_row][input_col] = temp_num;
 
-				if (temp_num == 0)
+				if (temp_num == 0)  //  如果该字符是0，证明是空位，放入空位数组中
 				{
 					ans_point[ans_num].row = input_row;
 					ans_point[ans_num].col = input_col;
 					ans_num++;
 				}
-				else
+				else  // 如果不是0，则打表记录相应信息，使得之后回溯时试探数字是能快速判断试探数字是否有效
 				{
 					if (rowmark[input_row][temp_num] == 1 ||
 						colmark[input_col][temp_num] == 1 ||
 						blockmark[GetBlockNum(input_row, input_col)][temp_num] == 1)
 					{
+						/*  如果当前数字已经在该 行 或 列 或 小九宫格 中出现过，则题目出错，该题没有解  */
 						right = 0;
 						break;
 					}
-					else
+					else  // 如果该数字满足要求，打表
 					{
 						SetMark(rowmark, input_row, temp_num, 1);
 						SetMark(colmark, input_col, temp_num, 1);
@@ -232,28 +243,26 @@ void  Solve()
 					}
 				}
 
-				input_col++;
+				input_col++; // 处理完当前输入行的一个字符，之后处理下一个
 			}
 
-			input_row++;
+			input_row++;  //  处理完一行，等待下一行输入
 
-			if (input_row == 9)
+			if (input_row == 9) // 如果已经输入了9行
 			{
-				if (right)
+				if (right)	// 输入的9行都信息正确
 				{
-					int max_point = -INF, min_point = INF;
-
 					for (int i = 0; i < ans_num; i++)
 					{
 						int r = ans_point[i].row, c = ans_point[i].col;
 						ans_point[i].num = row_num[r] + col_num[c] + block_num[GetBlockNum(r, c)];
 					}
 
-					sort(ans_point, ans_point + ans_num, Cmp);
+					sort(ans_point, ans_point + ans_num, Cmp);	// 根据空位数组中每个元素的num（周围已知数的个数）属性进行从大到小的排序
 
-					if (DFS(ans_point, ans_num, rowmark, colmark, blockmark, 0, block))
+					if (DFS(ans_point, ans_num, rowmark, colmark, blockmark, 0, block))		// 递归求解 
 					{
-						if (mark != 0)
+						if (mark != 0)	// 递归求解成功找到一个解，且当前题目不是第一题，则在输出题目之前，先空一行
 						{
 							printf("\n");
 						}
@@ -262,7 +271,7 @@ void  Solve()
 						mark++;
 					}
 				}
-				else
+				else  // 如果输入的九行中检测到错误
 				{
 					printf("Some errors?\n");
 				}
@@ -271,6 +280,7 @@ void  Solve()
 		
 	}
 
+	/*  已经完成了所有行的读入，但是最后这题没有满9行  */
 	if (input_row != 9)
 	{
 		if (mark != 0)
