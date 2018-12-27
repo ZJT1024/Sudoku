@@ -1,24 +1,23 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
+#include "../sudoku/headFile.h"
+#include<cstdlib>
 #include "../sudoku/solve.h"
 #include "../sudoku/solve.cpp"
-#include<cstdlib>
-#include<time.h>
-#include "../sudoku/headFile.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace test_DFS
-{		
+namespace text_DFS
+{
 	TEST_CLASS(UnitTest1)
 	{
 	public:
-		
+
 		bool Check(int block[Maxm][Maxm])
 		/***************************
-		 参数：block[Maxm][Maxm]:最后求解出的数独终局
-		 功能：判断输入的数独终局是否合法
-		 返回类型：bool，终局合法返回true,终局非法返回false
+		参数：block[Maxm][Maxm]:最后求解出的数独终局
+		功能：判断输入的数独终局是否合法
+		返回类型：bool，终局合法返回true,终局非法返回false
 		****************************/
 		{
 			int rm[Maxm][Maxm], cm[Maxm][Maxm], bm[Maxm][Maxm];		//  打表记录
@@ -37,6 +36,12 @@ namespace test_DFS
 				{
 					int temp_num = block[i][j];
 
+					if (temp_num == 0)	//  空位没有填完...
+					{
+						flag = false;
+						break;
+					}
+
 					if (rm[i][temp_num] || cm[j][temp_num] || bm[GetBlockNum(i, j)][temp_num])	//  当一行或者一列或者一个小九宫格中出现重复元素时，为假
 					{
 						flag = false;
@@ -51,7 +56,7 @@ namespace test_DFS
 		void Init(int block[Maxm][Maxm], int rm[Maxm][Maxm], int cm[Maxm][Maxm], int bm[Maxm][Maxm], int rnum[Maxm], int cnum[Maxm], int bnum[Maxm])
 		/****************************************************************************
 		参数block[][]：先存入一个合法的数独终局       rm[][]、cm[][]、bm[][]：打表记录某个元素是否在某行/列/宫
-		    rnum[]、cnum[]、bnum[]：记录每行、列、宫非空元素总数
+		rnum[]、cnum[]、bnum[]：记录每行、列、宫非空元素总数
 
 		功能：初始化个数组，将个数组设置为合法数独终局时候的状态
 		*****************************************************************************/
@@ -73,7 +78,7 @@ namespace test_DFS
 					}
 					else
 					{
-						int site = (temp_move[i - 1] + j) % 9;	// 平移
+						int site = (temp_move[i - 1] + j) % 9;	// 向左平移
 						block[i][j] = block[0][site];
 					}
 				}
@@ -81,16 +86,16 @@ namespace test_DFS
 		}
 
 		void Dig(Point ans_point[], int& ans_num, int max_num, int min_num,
-			int block[Maxm][Maxm], int rm[Maxm][Maxm], int cm[Maxm][Maxm], int bm[Maxm][Maxm],
-			int rnum[Maxm], int cnum[Maxm], int bnum[Maxm])
-			/**********************************************************************
-			参数 ans_point[]：存放空位的数组    ans_num：记录空位数量    max_num：挖空位的最大数量
-			     min_num：挖空位的最小数量    block[][]：已经存有合法数独终局的数组
-				 rm[][]、cm[][]、bm[][]：在挖空位时要抹去对应的记录
-				 rnum[]、cnum[]、bnum[]：在挖空位时要抹去对应的记录
-			
-			功能：在一个合法数独终局上随机挖最多max_num个空位，最少min_num个空位
-			************************************************************************/
+		int block[Maxm][Maxm], int rm[Maxm][Maxm], int cm[Maxm][Maxm], int bm[Maxm][Maxm],
+		int rnum[Maxm], int cnum[Maxm], int bnum[Maxm])
+		/**********************************************************************
+		参数 ans_point[]：存放空位的数组    ans_num：记录空位数量    max_num：挖空位的最大数量
+		min_num：挖空位的最小数量    block[][]：已经存有合法数独终局的数组
+		rm[][]、cm[][]、bm[][]：在挖空位时要抹去对应的记录
+		rnum[]、cnum[]、bnum[]：在挖空位时要抹去对应的记录
+
+		功能：在一个合法数独终局上随机挖最多max_num个空位，最少min_num个空位
+		************************************************************************/
 		{
 			if (max_num <= min_num)	//防止非法输入
 			{
@@ -136,13 +141,13 @@ namespace test_DFS
 
 			}
 
-			for (int i = 0; i < ans_num; i++)
+			for (int i = 0; i < ans_num; i++)	//  优化算法，尽可能减少回溯的次数
 			{
 				int r = ans_point[i].row, c = ans_point[i].col;
 				ans_point[i].num = rnum[r] + cnum[c] + bnum[GetBlockNum(r, c)];
 			}
 
-			sort(ans_point, ans_point + ans_num, Cmp);
+			sort(ans_point, ans_point + ans_num, Cmp);   //  以point.num为标准，降序排列
 		}
 
 		TEST_METHOD(checkDFS_right)
@@ -152,7 +157,7 @@ namespace test_DFS
 			int block[Maxm][Maxm];
 			int rm[Maxm][Maxm], cm[Maxm][Maxm], bm[Maxm][Maxm];
 			int rnum[Maxm], cnum[Maxm], bnum[Maxm];
-			
+
 			Init(block, rm, cm, bm, rnum, cnum, bnum);
 
 			Point ans_point[Maxm * Maxm];
@@ -164,7 +169,51 @@ namespace test_DFS
 			bool right_ans = Check(block);
 
 			Assert::AreEqual(true, flag);
-			//Assert::AreEqual(true, right_ans);
+			Assert::AreEqual(true, right_ans);
+		}
+
+		TEST_METHOD(boundary_right1)
+		{
+			// TODO: 在此输入测试代码
+
+			int block[Maxm][Maxm];
+			int rm[Maxm][Maxm], cm[Maxm][Maxm], bm[Maxm][Maxm];
+			int rnum[Maxm], cnum[Maxm], bnum[Maxm];
+
+			Init(block, rm, cm, bm, rnum, cnum, bnum);
+
+			Point ans_point[Maxm * Maxm];
+			int ans_num = 0;
+
+			Dig(ans_point, ans_num, 60, 30, block, rm, cm, bm, rnum, cnum, bnum);
+
+			bool flag = DFS(ans_point, ans_num, rm, cm, bm, 1, block);
+			bool right_ans = Check(block);
+
+			Assert::AreEqual(true, flag);
+			Assert::AreEqual(false, right_ans);		//  应该有一个空位
+		}
+
+		TEST_METHOD(boundary_right2)
+		{
+			// TODO: 在此输入测试代码
+
+			int block[Maxm][Maxm];
+			int rm[Maxm][Maxm], cm[Maxm][Maxm], bm[Maxm][Maxm];
+			int rnum[Maxm], cnum[Maxm], bnum[Maxm];
+
+			Init(block, rm, cm, bm, rnum, cnum, bnum);
+
+			Point ans_point[Maxm * Maxm];
+			int ans_num = 0;
+
+			Dig(ans_point, ans_num, 60, 30, block, rm, cm, bm, rnum, cnum, bnum);
+
+			bool flag = DFS(ans_point, ans_num, rm, cm, bm, ans_num, block);
+			bool right_ans = Check(block);
+
+			Assert::AreEqual(true, flag);
+			Assert::AreEqual(false, right_ans);  // 应该一个空位都没填
 		}
 
 		TEST_METHOD(overflow_error1)
